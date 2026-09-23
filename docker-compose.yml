@@ -1,0 +1,86 @@
+name: kallpa-crm
+
+# Entorno local completo del CRM.
+#   db  → Postgres 16       localhost:5440
+#   api → Express + TS      localhost:4000  (hot reload con tsx)
+#   web → Next.js 14        localhost:3010  (hot reload)
+# Levantar:  docker compose up -d --build
+# Ver logs:  docker compose logs -f api web
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: crm_db
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: America/Lima
+    ports:
+      - "5440:5432"
+    volumes:
+      - crm_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: ./apps/api
+    container_name: crm_api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/crm
+      PORT: "4000"
+      NODE_ENV: development
+      CHOKIDAR_USEPOLLING: "true"          # hot reload con carpetas montadas desde Windows
+      JWT_SECRET: dev-jwt-secret-cambiar-en-produccion
+      # 32 bytes en hex (64 caracteres) para cifrar tokens de canales (AES-256-GCM)
+      CRM_ENCRYPTION_KEY: 6b616c6c70612d63726d2d6c6f63616c2d646576656c6f706d656e742d6b6579
+      WEB_URL: http://localhost:3010
+      # URL con la que el navegador (y Meta/TikTok, vía túnel HTTPS) llegan al API
+      PUBLIC_API_URL: http://localhost:4000
+      MEDIA_DIR: /data/media
+      # Credenciales de plataforma (también editables en /admin → Plataforma)
+      META_APP_ID: ""
+      META_APP_SECRET: ""
+      META_CONFIG_ID: ""
+      META_VERIFY_TOKEN: crm-verify-token
+      META_API_VERSION: v22.0
+      TIKTOK_APP_ID: ""
+      TIKTOK_APP_SECRET: ""
+      SEED_ADMIN_EMAIL: admin@demo.com
+      SEED_ADMIN_PASSWORD: admin123
+    command: sh -c "npm run migrate && npm run seed && npm run dev"
+    volumes:
+      - ./apps/api:/app
+      - /app/node_modules
+      - crm_media:/data/media
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build: ./apps/web
+    container_name: crm_web
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      WATCHPACK_POLLING: "true"
+    command: npm run dev
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3010:3010"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  crm_pgdata:
+  crm_media:

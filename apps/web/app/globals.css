@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  body { @apply bg-canvas text-ink-800 text-sm; font-feature-settings: 'cv11', 'ss01'; }
+  ::selection { @apply bg-brand-100 text-brand-900; }
+  * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; border: 2px solid transparent; background-clip: content-box; }
+  *::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+}
+
+@layer components {
+  .input {
+    @apply block w-full rounded-lg border border-ink-200 bg-white px-3 py-2 text-sm text-ink-900 shadow-xs
+           placeholder:text-ink-400 transition-colors
+           focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10
+           disabled:cursor-not-allowed disabled:bg-ink-50 disabled:text-ink-500;
+  }
+  .label { @apply mb-1.5 block text-[13px] font-medium text-ink-700; }
+  .card { @apply rounded-xl border border-ink-200/80 bg-white shadow-card; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-2xs font-semibold; }
+  .th { @apply px-4 py-2.5 text-left text-2xs font-semibold uppercase tracking-wider text-ink-500; }
+  .td { @apply px-4 py-3 align-middle; }
+  .kbd { @apply rounded border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-mono text-[10px] text-ink-500; }
+}
+
+.scroll-thin::-webkit-scrollbar { width: 6px; height: 6px; }
