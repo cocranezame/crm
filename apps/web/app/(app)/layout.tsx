@@ -2,10 +2,11 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-store';
-import { useMe } from '@/hooks/datos';
+import { useMe, ventanaPermitida } from '@/hooks/datos';
 import { RealtimeBridge } from '@/hooks/realtime';
 import { Sidebar } from '@/components/layout/sidebar';
-import { Cargando } from '@/components/ui';
+import { Lock } from 'lucide-react';
+import { Button, Cargando, Vacio } from '@/components/ui';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const token = useAuth((s) => s.token);
@@ -31,7 +32,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen overflow-hidden">
       <RealtimeBridge />
       <Sidebar />
-      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">{children}</main>
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {ventanaPermitida(me.data, pathname) ? children : (
+          <div className="flex flex-1 items-center justify-center">
+            <Vacio icono={<Lock className="h-5 w-5" />} titulo="Esta sección no está incluida en tu plan"
+              texto="Pide a Kallpasoft que active el módulo para tu empresa y aparecerá en el menú."
+              accion={<Button variante="secundario" onClick={() => router.push('/inicio')}>Ir al inicio</Button>} />
+          </div>
+        )}
+      </main>
     </div>
   );
 }

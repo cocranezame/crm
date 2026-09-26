@@ -1,19 +1,21 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   LayoutDashboard, Inbox, Users, KanbanSquare, FileText, Megaphone, MessagesSquare, Settings,
-  ChevronsUpDown, Check, Plus, LogOut, UserCircle2, ShieldCheck, Building2,
+  ChevronsUpDown, Check, Plus, LogOut, UserCircle2, ShieldCheck, Building2, LifeBuoy, CalendarClock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { cn } from '@/lib/utils';
-import { useMe, usePuede } from '@/hooks/datos';
+import { useMe, usePuede, ventanaPermitida } from '@/hooks/datos';
 import { useConectado } from '@/hooks/realtime';
 import { Avatar, Menu, Tooltip } from '@/components/ui';
 import * as DM from '@radix-ui/react-dropdown-menu';
+import { SoporteModal } from '@/components/crm/soporte-modal';
 
 const ROL: Record<string, string> = { propietario: 'Propietario', admin: 'Administrador', supervisor: 'Supervisor', agente: 'Agente' };
 
@@ -27,6 +29,7 @@ export function Sidebar() {
   const conectado = useConectado();
   const esAdmin = usePuede('admin');
   const esSupervisor = usePuede('supervisor');
+  const [soporte, setSoporte] = useState(false);
 
   const contadores = useQuery({ queryKey: ['contadores'], queryFn: () => api.get<{ no_leidas_mias: number; sin_asignar: number }>('/conversaciones/contadores'), refetchInterval: 60_000, enabled: !!me?.empresa });
   const chat = useQuery({ queryKey: ['chat', 'no-leidos'], queryFn: () => api.get<{ total: number }>('/chat/no-leidos'), refetchInterval: 60_000, enabled: !!me?.empresa });
@@ -39,7 +42,12 @@ export function Sidebar() {
     { href: '/plantillas', label: 'Plantillas', icono: FileText },
     ...(esSupervisor ? [{ href: '/difusiones', label: 'Difusiones', icono: Megaphone }] : []),
     { href: '/equipo', label: 'Chat del equipo', icono: MessagesSquare, badge: chat.data?.total },
-  ];
+  ].filter((n) => ventanaPermitida(me, n.href)); // plan de Kallpasoft ∩ rol
+
+  // Ficha Kallpasoft §6.4: el vencimiento no corta el acceso; solo se avisa desde 7 días antes.
+  const diasParaVencer = me?.acceso?.gestionado && me.acceso.fecha_fin
+    ? Math.ceil((new Date(`${me.acceso.fecha_fin}T23:59:59`).getTime() - Date.now()) / 86_400_000) : null;
+  const avisoVence = diasParaVencer !== null && diasParaVencer <= 7;
 
   async function cambiarEmpresa(id: string) {
     try {
@@ -88,9 +96,21 @@ export function Sidebar() {
                 </DM.Item>
               ))}
               <DM.Separator className="my-1 h-px bg-ink-100" />
-              <DM.Item onSelect={nuevaEmpresa} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-ink-700 outline-none data-[highlighted]:bg-ink-100">
-                <Plus className="h-4 w-4 text-ink-400" /> Crear otra empresa
-              </DM.Item>
+              {me?.permite_nueva_empresa ? (
+                <DM.Item onSelect={nuevaEmpresa} className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-ink-700 outline-none data-[highlighted]:bg-ink-100">
+                  <Plus className="h-4 w-4 text-ink-400" /> Crear otra empresa
+                </DM.Item>
+              ) : (
+                <DM.Item disabled className="flex cursor-not-allowed items-start gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-ink-400 outline-none">
+                  <Plus className="mt-0.5 h-4 w-4 text-ink-300" />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5">Crear otra empresa
+                      <span className="rounded-full bg-ink-100 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide text-ink-500">Próximamente</span>
+                    </span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-ink-400">Las nuevas empresas se activan desde Kallpasoft.</span>
+                  </span>
+                </DM.Item>
+              )}
             </DM.Content>
           </DM.Portal>
         </DM.Root>
@@ -111,11 +131,15 @@ export function Sidebar() {
           );
         })}
         <div className="my-3 h-px bg-white/5" />
-        <Link href="/config" className={cn('group flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors',
+        {ventanaPermitida(me, '/config') && <Link href="/config" className={cn('group flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors',
           pathname.startsWith('/config') ? 'bg-white/10 text-white' : 'text-ink-400 hover:bg-white/5 hover:text-ink-100')}>
           <Settings className={cn('h-[18px] w-[18px]', pathname.startsWith('/config') ? 'text-brand-300' : 'text-ink-500 group-hover:text-ink-300')} />
           Configuración
-        </Link>
+        </Link>}
+        <button type="button" onClick={() => setSoporte(true)}
+          className="group flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[13.5px] font-medium text-ink-400 transition-colors hover:bg-white/5 hover:text-ink-100">
+          <LifeBuoy className="h-[18px] w-[18px] text-ink-500 group-hover:text-ink-300" /> Soporte
+        </button>
         {me?.usuario.es_superadmin && (
           <Link href="/admin" className={cn('group flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13.5px] font-medium transition-colors',
             pathname.startsWith('/admin') ? 'bg-white/10 text-white' : 'text-ink-400 hover:bg-white/5 hover:text-ink-100')}>
@@ -123,6 +147,17 @@ export function Sidebar() {
           </Link>
         )}
       </nav>
+
+      {/* Aviso de vencimiento del plan (Kallpasoft) */}
+      {avisoVence && esAdmin && (
+        <div className="mx-3 mb-2 flex items-start gap-2.5 rounded-xl bg-amber-400/10 p-3 ring-1 ring-amber-400/20">
+          <CalendarClock className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+          <div className="text-[11.5px] leading-snug">
+            <p className="font-semibold text-amber-200">{diasParaVencer! < 0 ? 'Tu plan venció' : diasParaVencer === 0 ? 'Tu plan vence hoy' : `Tu plan vence en ${diasParaVencer} día${diasParaVencer === 1 ? '' : 's'}`}</p>
+            <p className="mt-0.5 text-amber-100/70">Renuévalo con Kallpasoft para no perder el acceso.</p>
+          </div>
+        </div>
+      )}
 
       {/* Uso del plan */}
       {me?.plan && esAdmin && (
@@ -158,6 +193,7 @@ export function Sidebar() {
           { label: 'Cerrar sesión', icono: <LogOut className="h-4 w-4" />, peligro: true, onClick: () => { salir(); qc.clear(); router.replace('/login'); } },
         ]} />
       </div>
+      <SoporteModal abierto={soporte} onClose={() => setSoporte(false)} />
     </aside>
   );
 }

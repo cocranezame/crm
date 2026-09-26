@@ -10,6 +10,12 @@ export interface Me {
     codigo: string; nombre: string; usuarios: number; contactos: number; canales: number; difusionesMes: number;
     uso: { usuarios: number; contactos: number; canales: number; difusionesMes: number }; trial_hasta: string | null;
   };
+  /** Contrato con Kallpasoft. `gestionado=false` → empresa local, sin restricción de ventanas. */
+  acceso: null | {
+    gestionado: boolean; tenant_id: string | null; estado: 'activo' | 'suspendido' | 'cancelado'; fecha_fin: string | null;
+    modulos: string[] | null; ventanas: string[]; catalogo: string[];
+  };
+  permite_nueva_empresa: boolean;
 }
 
 export interface EtiquetaMin { etiqueta_id: number; nombre: string; color: string }

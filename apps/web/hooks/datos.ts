@@ -15,6 +15,14 @@ export function usePuede(minimo: Rol): boolean {
   return !!data?.rol && NIVEL[data.rol] >= NIVEL[minimo];
 }
 
+/** ¿El plan (Kallpasoft) entrega esta ruta? Rutas fuera del catálogo (perfil, admin…) siempre sí. */
+export function ventanaPermitida(me: Me | undefined, pathname: string): boolean {
+  const a = me?.acceso;
+  if (!a) return true;
+  const base = a.catalogo.find((h) => pathname === h || pathname.startsWith(h + '/'));
+  return !base || a.ventanas.includes(base);
+}
+
 export const useEtiquetas = () => useQuery({ queryKey: ['etiquetas'], queryFn: () => api.get<{ etiquetas: Etiqueta[] }>('/etiquetas'), select: (d) => d.etiquetas });
 export const useCampos = () => useQuery({ queryKey: ['campos'], queryFn: () => api.get<{ campos: Campo[] }>('/campos'), select: (d) => d.campos });
 export const usePipelines = () => useQuery({ queryKey: ['pipelines'], queryFn: () => api.get<{ pipelines: Pipeline[] }>('/pipelines'), select: (d) => d.pipelines });
