@@ -18,6 +18,7 @@ import { useEtiquetas, useMiembros, usePipelines, usePuede } from '@/hooks/datos
 import { Avatar, Button, Cargando, EtiquetaChip, Field, Input, Modal, Select, Tooltip, Vacio } from '@/components/ui';
 import { IconoCanal } from '@/components/crm/canal';
 import { ContactoPicker } from '@/components/crm/contacto-picker';
+import { NuevoContactoModal } from '@/components/crm/nuevo-contacto-modal';
 import { NegocioDrawer } from '@/components/crm/negocio-drawer';
 
 type Columnas = Record<number, NegocioTarjeta[]>;
@@ -312,6 +313,7 @@ function NuevoNegocio({ pipelineId, etapas, etapaInicial, onClose }: { pipelineI
   const qc = useQueryClient();
   const { data: equipo } = useMiembros();
   const [contacto, setContacto] = useState<{ contacto_id: number; nombre: string | null } | null>(null);
+  const [creandoContacto, setCreandoContacto] = useState(false);
   const [f, setF] = useState({ etapa_id: String(etapaInicial ?? etapas[0]?.etapa_id ?? ''), titulo: '', monto: '', asignado_a: '' });
   const crear = useMutation({
     mutationFn: () => api.post('/negocios', {
@@ -322,10 +324,11 @@ function NuevoNegocio({ pipelineId, etapas, etapaInicial, onClose }: { pipelineI
     onError: (e) => toast.error((e as Error).message),
   });
   return (
-    <Modal abierto onClose={onClose} titulo="Nuevo negocio" descripcion="Crea una oportunidad para un contacto existente."
+    <>
+    <Modal abierto onClose={onClose} titulo="Nuevo negocio" descripcion="Elige un contacto o créalo aquí mismo, sin salir del tablero."
       pie={<><Button variante="secundario" onClick={onClose}>Cancelar</Button><Button disabled={!contacto} cargando={crear.isPending} onClick={() => crear.mutate()}>Crear negocio</Button></>}>
       <div className="space-y-4">
-        <Field label="Contacto" required hint={<>¿No existe? <Link href="/contactos?nuevo=1" className="text-brand-600 hover:underline">Créalo primero</Link></>}>
+        <Field label="Contacto" required hint={<>¿No existe? <button type="button" onClick={() => setCreandoContacto(true)} className="font-medium text-brand-600 hover:underline">Crear contacto nuevo</button></>}>
           <ContactoPicker valor={contacto} onChange={(c) => { setContacto(c); if (!f.titulo) setF((x) => ({ ...x, titulo: '' })); }} />
         </Field>
         <Field label="Título"><Input value={f.titulo} onChange={(e) => setF({ ...f, titulo: e.target.value })} placeholder="Ej. Cotización de materiales" /></Field>
@@ -345,5 +348,8 @@ function NuevoNegocio({ pipelineId, etapas, etapaInicial, onClose }: { pipelineI
         </Field>
       </div>
     </Modal>
+    <NuevoContactoModal abierto={creandoContacto} ocultarPipeline onClose={() => setCreandoContacto(false)}
+      onCreado={(c) => { setContacto(c); toast.success(`${c.nombre ?? 'Contacto'} seleccionado`); }} />
+    </>
   );
 }
