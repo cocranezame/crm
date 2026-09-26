@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { ENV } from '../config/env';
 import { pool } from '../db/pool';
 import { HttpError, prohibido } from '../lib/http';
+import { tieneModulo, type ModuloTecnico } from '../lib/catalogo';
 
 export type Rol = 'propietario' | 'admin' | 'supervisor' | 'agente';
 const NIVEL: Record<Rol, number> = { agente: 1, supervisor: 2, admin: 3, propietario: 4 };
@@ -13,6 +14,10 @@ export interface AuthCtx {
   rol:        Rol;
   superadmin: boolean;
   nombre:     string;
+  /** RUC en Kallpasoft; null = empresa local (no gestionada). */
+  tenantId:   string | null;
+  /** Módulos técnicos del plan; null = empresa local, sin restricción. */
+  modulos:    string[] | null;
 }
 
 export interface TokenPayload { sub: string; emp: string | null }
@@ -63,17 +68,21 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
     let p: TokenPayload;
     try { p = verificarToken(t); } catch { throw new HttpError(401, 'Sesión vencida, vuelve a ingresar', 'token_invalido'); }
     if (!p.emp) throw new HttpError(403, 'Selecciona una empresa', 'sin_empresa');
-    const { rows } = await pool.query<{ rol: Rol; nombre: string; es_superadmin: boolean; emp_activa: boolean }>(
-      `SELECT m.rol, u.nombre, u.es_superadmin, e.activo AS emp_activa
+    const { rows } = await pool.query<{ rol: Rol; nombre: string; es_superadmin: boolean; emp_activa: boolean;
+      tenant_id: string | null; modulos_activos: string[] | null; motivo_suspension: string | null }>(
+      `SELECT m.rol, u.nombre, u.es_superadmin, e.activo AS emp_activa,
+              tc.tenant_id, tc.modulos_activos, tc.motivo_suspension
          FROM app.miembros m
          JOIN app.usuarios u ON u.usuario_id = m.usuario_id AND u.activo
          JOIN app.empresas e ON e.empresa_id = m.empresa_id
+         LEFT JOIN app.tenant_config tc ON tc.empresa_id = m.empresa_id
         WHERE m.usuario_id = $1 AND m.empresa_id = $2 AND m.activo`,
       [p.sub, p.emp]);
     const r = rows[0];
     if (!r) throw new HttpError(401, 'Ya no perteneces a esta empresa', 'token_invalido');
-    if (!r.emp_activa) throw new HttpError(403, 'La empresa está suspendida. Contacta a soporte.', 'empresa_suspendida');
-    req.auth = { usuarioId: p.sub, empresaId: p.emp, rol: r.rol, superadmin: r.es_superadmin, nombre: r.nombre };
+    if (!r.emp_activa) throw new HttpError(403, mensajeSuspension(r.motivo_suspension), 'empresa_suspendida');
+    req.auth = { usuarioId: p.sub, empresaId: p.emp, rol: r.rol, superadmin: r.es_superadmin, nombre: r.nombre,
+      tenantId: r.tenant_id, modulos: r.tenant_id ? (r.modulos_activos ?? []) : null };
     req.usuarioId = p.sub;
     req.esSuperadmin = r.es_superadmin;
     next();
@@ -87,6 +96,19 @@ export function tieneRol(rol: Rol, minimo: Rol): boolean {
 export function requireRol(minimo: Rol) {
   return (req: Request, _res: Response, next: NextFunction) => {
     if (!req.auth || !tieneRol(req.auth.rol, minimo)) return next(prohibido(`Requiere rol ${minimo} o superior`));
+    next();
+  };
+}
+
+export function mensajeSuspension(motivo: string | null): string {
+  return motivo ? `La empresa está suspendida: ${motivo}` : 'La empresa está suspendida. Contacta a soporte.';
+}
+
+/** Gating por módulo técnico (ficha §6.1). Debe ir después de requireAuth. */
+export function requireModulo(modulo: ModuloTecnico) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.auth) return next(new HttpError(401, 'Sesión requerida'));
+    if (!tieneModulo(req.auth.modulos, modulo)) return next(new HttpError(403, `Módulo '${modulo}' no habilitado en este plan`, 'modulo_no_habilitado'));
     next();
   };
 }

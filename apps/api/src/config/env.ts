@@ -16,6 +16,11 @@ export const ENV = {
   WEB_URL:         process.env.WEB_URL ?? 'http://localhost:3010',
   PUBLIC_API_URL:  process.env.PUBLIC_API_URL ?? 'http://localhost:4000',
   MEDIA_DIR:       process.env.MEDIA_DIR ?? './.media',
+  // Conector Kallpasoft (ficha técnica §8). Sin INTERNAL_API_KEY, /internal/v1 responde 403 a todo.
+  INTERNAL_API_KEY:   process.env.INTERNAL_API_KEY ?? '',
+  KALLPASOFT_API_URL: (process.env.KALLPASOFT_API_URL ?? '').replace(/\/+$/, ''),
+  // Alta de empresas desde el propio CRM (menú de empresas). Deshabilitada: las empresas las crea Kallpasoft.
+  PERMITIR_NUEVA_EMPRESA: process.env.PERMITIR_NUEVA_EMPRESA === 'true',
 };
 
 export const esProduccion = ENV.NODE_ENV === 'production';

@@ -52,6 +52,11 @@ services:
       TIKTOK_APP_SECRET: ""
       SEED_ADMIN_EMAIL: admin@demo.com
       SEED_ADMIN_PASSWORD: admin123
+      # Conector Kallpasoft (docs/INTEGRACION-KALLPASOFT.md). La misma key va en el panel del central
+      # (Catálogo → Productos → api_key). El central corre en el host (uvicorn :8001).
+      INTERNAL_API_KEY: crm-dev-internal-key-cambiar
+      KALLPASOFT_API_URL: http://host.docker.internal:8001
+      PERMITIR_NUEVA_EMPRESA: "false"
     command: sh -c "npm run migrate && npm run seed && npm run dev"
     volumes:
       - ./apps/api:/app
@@ -59,6 +64,8 @@ services:
       - crm_media:/data/media
     ports:
       - "4000:4000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       db:
         condition: service_healthy

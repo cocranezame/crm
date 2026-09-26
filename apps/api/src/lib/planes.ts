@@ -1,5 +1,6 @@
 import { pool } from '../db/pool';
 import { HttpError } from './http';
+import { enviarEvento } from './kallpasoft';
 
 export type Plan = 'trial' | 'basico' | 'pro' | 'enterprise';
 
@@ -35,12 +36,26 @@ export async function usoEmpresa(empresaId: string): Promise<Record<Recurso, num
   return out;
 }
 
+/**
+ * Límites efectivos de la empresa. Si Kallpasoft la gestiona, `usuarios` = su `max_usuarios`
+ * (ficha §6.5); el resto sale del plan interno de la empresa.
+ */
+export async function limitesEmpresa(empresaId: string): Promise<LimitesPlan & { tenantId: string | null }> {
+  const { rows: [r] } = await pool.query<{ plan: Plan; tenant_id: string | null; max_usuarios: number | null }>(
+    `SELECT e.plan, tc.tenant_id, tc.max_usuarios FROM app.empresas e LEFT JOIN app.tenant_config tc USING (empresa_id) WHERE e.empresa_id = $1`,
+    [empresaId]);
+  const base = PLANES[r?.plan ?? 'trial'];
+  return { ...base, usuarios: r?.tenant_id ? Number(r.max_usuarios) : base.usuarios, tenantId: r?.tenant_id ?? null };
+}
+
 /** Lanza 402 si agregar `cantidad` supera el límite del plan. */
 export async function verificarLimite(empresaId: string, recurso: Recurso, cantidad = 1): Promise<void> {
-  const { rows } = await pool.query<{ plan: Plan }>('SELECT plan FROM app.empresas WHERE empresa_id = $1', [empresaId]);
-  const lim = PLANES[rows[0]?.plan ?? 'trial'][recurso];
+  const limites = await limitesEmpresa(empresaId);
+  const lim = limites[recurso];
   const { rows: c } = await pool.query<{ n: number }>(CONTEO[recurso], [empresaId]);
   if (Number(c[0].n) + cantidad > lim) {
+    // Señal de upsell para Kallpasoft (ficha §7). Fire-and-forget.
+    if (recurso === 'usuarios' && limites.tenantId) enviarEvento('tenant.limite_usuarios', limites.tenantId, { limite: lim, actuales: Number(c[0].n) });
     throw new HttpError(402, `Tu plan permite hasta ${lim.toLocaleString('es-PE')} ${ETIQUETA[recurso]}. Mejora el plan para agregar más.`, 'limite_plan');
   }
 }
