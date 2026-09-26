@@ -9,6 +9,7 @@ import { whatsappAdapter } from '../src/modules/canales/whatsapp/adapter';
 import { messengerAdapter } from '../src/modules/canales/messenger/adapter';
 import { tiktokAdapter } from '../src/modules/canales/tiktok/adapter';
 import { indicesDe, validarVariables } from '../src/modules/plantillas/plantillas.service';
+import { MODULOS_TECNICOS, VENTANAS, autodescripcion, tieneModulo, ventanasDelPlan } from '../src/lib/catalogo';
 
 test('normalizarTelefono', () => {
   assert.equal(normalizarTelefono('987 654 321'), '+51987654321');
@@ -74,4 +75,24 @@ test('variables de plantilla', () => {
   assert.throws(() => validarVariables('Hola {{2}}', []));
   assert.throws(() => validarVariables('Hola {{1}}', [{ indice: 1, origen: 'manual', valor: '', ejemplo: '' }]));
   assert.equal(validarVariables('Hola {{1}}', [{ indice: 1, origen: 'contacto', valor: 'nombre', ejemplo: 'Ana' }]).length, 1);
+});
+
+test('catálogo Kallpasoft: módulos y ventanas por plan', () => {
+  // empresa local (no gestionada): todo
+  assert.equal(ventanasDelPlan(null, null).length, VENTANAS.length);
+  assert.ok(tieneModulo(null, 'difusiones'));
+  // comodín del contrato
+  assert.equal(ventanasDelPlan(['todos'], null).length, VENTANAS.length);
+  // solo crm: sin difusiones ni chat del equipo
+  const soloCrm = ventanasDelPlan(['crm'], null);
+  assert.ok(soloCrm.includes('/inbox') && !soloCrm.includes('/difusiones') && !soloCrm.includes('/equipo'));
+  assert.equal(tieneModulo(['crm'], 'difusiones'), false);
+  // lista explícita del central: solo recorta, nunca amplía
+  assert.deepEqual(ventanasDelPlan(['crm'], ['/inbox', '/difusiones']), ['/inbox']);
+  // gestionada sin módulos: nada
+  assert.deepEqual(ventanasDelPlan([], null), []);
+  // toda ventana apunta a un módulo declarado y los href no se repiten
+  assert.ok(VENTANAS.every((v) => (MODULOS_TECNICOS as readonly string[]).includes(v.modulo_tecnico)));
+  assert.equal(new Set(VENTANAS.map((v) => v.href)).size, VENTANAS.length);
+  assert.equal(autodescripcion().producto, 'crm');
 });

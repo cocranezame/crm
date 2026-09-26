@@ -17,6 +17,8 @@ Fuente de verdad para trabajar en este repo (humanos y agentes).
 7. Frontend: usar el kit de `components/ui` (Button, Field, Input, Select, Modal, Drawer, Menu, Popover, Tooltip, PageHeader, Vacio, Cargando, confirmar). Todo cambio debe verse y probarse en pantalla; mantener el nivel visual profesional.
 8. Textos de interfaz en español; contraseñas con `bcryptjs`.
 9. La IA queda fuera de esta versión: no mezclar lógica de IA en `crm.*`; cuando se agregue irá en un esquema `ia` y consumirá los mismos servicios de dominio.
+10. **Kallpasoft gobierna el acceso** (`docs/INTEGRACION-KALLPASOFT.md`). Ventanas y módulos técnicos solo en `apps/api/src/lib/catalogo.ts`; toda ruta de negocio nueva va detrás de `requireModulo(...)`. El conector `/internal/v1` es idempotente y responde `{detail}`. Nunca llamar al central en el request de un usuario.
+11. **Reutilizar antes de crear**: si ya existe un componente/servicio con la misma función (modal, picker, service), se usa ese; se avisa qué se reutiliza.
 
 ## Verificación antes de entregar
 - `cd apps/api && npx tsc --noEmit && npm test`
