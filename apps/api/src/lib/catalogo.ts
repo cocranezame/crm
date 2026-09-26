@@ -15,7 +15,7 @@ export const VENTANAS: Ventana[] = [
   { href: '/inicio',     label: 'Inicio',          grupo: 'CRM',          modulo_tecnico: 'crm' },
   { href: '/inbox',      label: 'Bandeja',         grupo: 'CRM',          modulo_tecnico: 'crm' },
   { href: '/contactos',  label: 'Contactos',       grupo: 'CRM',          modulo_tecnico: 'crm' },
-  { href: '/pipelines',  label: 'Pipelines',       grupo: 'CRM',          modulo_tecnico: 'crm' },
+  { href: '/pipelines',  label: 'Kanban',          grupo: 'CRM',          modulo_tecnico: 'crm' },
   { href: '/plantillas', label: 'Plantillas',      grupo: 'CRM',          modulo_tecnico: 'crm' },
   { href: '/config',     label: 'Configuración',   grupo: 'CRM',          modulo_tecnico: 'crm' },
   { href: '/difusiones', label: 'Difusiones',      grupo: 'Marketing',    modulo_tecnico: 'difusiones' },

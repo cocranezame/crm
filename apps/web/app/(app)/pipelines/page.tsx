@@ -13,6 +13,6 @@ export default function PipelinesIndex() {
     if (p) router.replace(`/pipelines/${p.pipeline_id}`);
   }, [data, router]);
   if (isLoading || data?.some((p) => p.activo)) return <Cargando />;
-  return <Vacio icono={<KanbanSquare />} titulo="Aún no hay pipelines" texto="Crea tu primer pipeline para organizar tus oportunidades de venta."
-    accion={<Button onClick={() => router.push('/config/pipelines')}>Crear pipeline</Button>} />;
+  return <Vacio icono={<KanbanSquare />} titulo="Aún no hay tableros Kanban" texto="Crea tu primer tablero para organizar tus oportunidades de venta."
+    accion={<Button onClick={() => router.push('/config/pipelines')}>Crear tablero</Button>} />;
 }

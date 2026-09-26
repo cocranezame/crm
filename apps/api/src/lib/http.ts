@@ -63,7 +63,7 @@ function mensajeUnico(constraint?: string): string {
   const m: Record<string, string> = {
     ux_contacto_tel: 'Ya existe un contacto con ese teléfono',
     ux_contacto_email: 'Ya existe un contacto con ese email',
-    ux_negocio_abierto: 'El contacto ya tiene un negocio abierto en ese pipeline',
+    ux_negocio_abierto: 'El contacto ya tiene un negocio abierto en ese tablero',
     ux_usuarios_email: 'Ya existe un usuario con ese email',
     etiquetas_empresa_id_nombre_key: 'Ya existe una etiqueta con ese nombre',
     campos_empresa_id_entidad_clave_key: 'Ya existe un campo con esa clave',

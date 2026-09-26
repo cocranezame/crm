@@ -7,7 +7,7 @@ import { useMe } from '@/hooks/datos';
 
 const SECCIONES = [
   { grupo: 'CRM', items: [
-    { href: '/config/pipelines', label: 'Pipelines', desc: 'Etapas del embudo', icono: KanbanSquare },
+    { href: '/config/pipelines', label: 'Kanban', desc: 'Tableros y etapas', icono: KanbanSquare },
     { href: '/config/etiquetas', label: 'Etiquetas', desc: 'Clasifica contactos', icono: Tag },
     { href: '/config/campos', label: 'Campos personalizados', desc: 'Datos a medida', icono: SlidersHorizontal },
   ] },

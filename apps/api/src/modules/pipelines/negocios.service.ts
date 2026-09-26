@@ -32,7 +32,7 @@ export async function crearNegocio(db: Db, empresaId: string, d: {
     const { rows: [e] } = await db.query<{ etapa_id: number }>(
       `SELECT etapa_id FROM crm.etapas WHERE pipeline_id = $1 AND empresa_id = $2 ORDER BY (tipo <> 'abierta'), orden LIMIT 1`,
       [d.pipeline_id, empresaId]);
-    if (!e) throw invalido('El pipeline no tiene etapas');
+    if (!e) throw invalido('El tablero no tiene etapas');
     etapaId = e.etapa_id;
   }
   const etapa = await etapaDe(db, empresaId, etapaId);
@@ -68,7 +68,7 @@ export async function moverNegocio(db: Db, empresaId: string, negocioId: number,
     const { rows: [otro] } = await db.query(
       `SELECT 1 FROM crm.negocios WHERE contacto_id = $1 AND pipeline_id = $2 AND cerrado_en IS NULL AND negocio_id <> $3`,
       [n.contacto_id, n.pipeline_id, negocioId]);
-    if (otro) throw conflicto('El contacto ya tiene otro negocio abierto en este pipeline');
+    if (otro) throw conflicto('El contacto ya tiene otro negocio abierto en este tablero');
   }
 
   const { rows: [act] } = await db.query(

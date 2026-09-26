@@ -137,7 +137,7 @@ export function PanelContacto({ contactoId, conversacionId }: { contactoId: numb
           {disponibles.length > 0 && (
             <div className="flex gap-2">
               <Select value={nuevoEn} onChange={(e) => setNuevoEn(e.target.value)} className="h-8 py-1 text-xs">
-                <option value="">Agregar a pipeline…</option>
+                <option value="">Agregar al Kanban…</option>
                 {disponibles.map((p) => <option key={p.pipeline_id} value={p.pipeline_id}>{p.nombre}</option>)}
               </Select>
               <Button tamano="sm" variante="secundario" disabled={!nuevoEn} cargando={crearNegocio.isPending} onClick={() => crearNegocio.mutate(Number(nuevoEn))}>Crear</Button>

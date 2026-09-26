@@ -38,7 +38,7 @@ export function Sidebar() {
     { href: '/inicio', label: 'Inicio', icono: LayoutDashboard },
     { href: '/inbox', label: 'Bandeja', icono: Inbox, badge: contadores.data?.no_leidas_mias },
     { href: '/contactos', label: 'Contactos', icono: Users },
-    { href: '/pipelines', label: 'Pipelines', icono: KanbanSquare },
+    { href: '/pipelines', label: 'Kanban', icono: KanbanSquare },
     { href: '/plantillas', label: 'Plantillas', icono: FileText },
     ...(esSupervisor ? [{ href: '/difusiones', label: 'Difusiones', icono: Megaphone }] : []),
     { href: '/equipo', label: 'Chat del equipo', icono: MessagesSquare, badge: chat.data?.total },

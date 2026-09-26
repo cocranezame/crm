@@ -436,22 +436,22 @@ function Negocios({ d, onNegocio }: { d: Detalle; onNegocio: (id: number) => voi
     <div className="space-y-4">
       <div className="card flex flex-wrap items-center gap-3 p-4">
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-medium text-ink-900">Agregar a pipeline</p>
-          <p className="text-xs text-ink-500">Crea un negocio en la primera etapa del pipeline elegido.</p>
+          <p className="text-[13px] font-medium text-ink-900">Agregar al Kanban</p>
+          <p className="text-xs text-ink-500">Crea un negocio en la primera etapa del tablero elegido.</p>
         </div>
         {disponibles.length ? (
           <div className="flex items-center gap-2">
             <Select value={pipe} onChange={(e) => setPipe(e.target.value)} className="h-8 w-52 py-1 text-[13px]">
-              <option value="">Elige un pipeline…</option>
+              <option value="">Elige un tablero…</option>
               {disponibles.map((p) => <option key={p.pipeline_id} value={p.pipeline_id}>{p.nombre}</option>)}
             </Select>
             <Button tamano="sm" icono={<Plus className="h-3.5 w-3.5" />} disabled={!pipe} cargando={crear.isPending} onClick={() => crear.mutate()}>Agregar</Button>
           </div>
-        ) : <span className="text-xs text-ink-400">Ya tiene un negocio abierto en cada pipeline activo.</span>}
+        ) : <span className="text-xs text-ink-400">Ya tiene un negocio abierto en cada tablero activo.</span>}
       </div>
 
       {!d.negocios.length ? (
-        <div className="card"><Vacio icono={<KanbanSquare className="h-5 w-5" />} titulo="Sin negocios" texto="Este contacto aún no está en ningún pipeline de ventas." /></div>
+        <div className="card"><Vacio icono={<KanbanSquare className="h-5 w-5" />} titulo="Sin negocios" texto="Este contacto aún no está en ningún tablero de ventas." /></div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {d.negocios.map((n) => {
@@ -618,7 +618,7 @@ function FusionarModal({ abierto, onClose, d, onFusionado }: { abierto: boolean;
             {otro ? <>«{otro.nombre ?? 'Sin nombre'}» se integrará en «{c.nombre ?? 'este contacto'}».</> : 'El otro contacto se integrará en este.'}
           </p>
           <ul className="mt-2 space-y-1.5">
-            {['Sus identidades de canal (WhatsApp, Messenger, TikTok…) y conversaciones pasan a este contacto.', 'Las notas, etiquetas y negocios también se mueven. Si ambos tienen un negocio abierto en el mismo pipeline, el del duplicado se cierra.',
+            {['Sus identidades de canal (WhatsApp, Messenger, TikTok…) y conversaciones pasan a este contacto.', 'Las notas, etiquetas y negocios también se mueven. Si ambos tienen un negocio abierto en el mismo tablero, el del duplicado se cierra.',
               'Los datos vacíos de este contacto se completan con los del otro; los que ya tiene no se sobrescriben.'].map((t) => (
               <li key={t} className="flex gap-2"><Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />{t}</li>
             ))}

@@ -92,7 +92,7 @@ export default function CamposPage() {
             { valor: 'contacto', label: <><User className="h-3.5 w-3.5" />Contacto</>, contador: cuenta('contacto') },
             { valor: 'negocio', label: <><KanbanSquare className="h-3.5 w-3.5" />Negocio</>, contador: cuenta('negocio') },
           ]} />
-          <p className="text-[13px] text-ink-500">{entidad === 'contacto' ? 'Aparecen en la ficha del contacto y en la bandeja' : 'Aparecen al crear y editar negocios del pipeline'}</p>
+          <p className="text-[13px] text-ink-500">{entidad === 'contacto' ? 'Aparecen en la ficha del contacto y en la bandeja' : 'Aparecen al crear y editar negocios del Kanban'}</p>
         </div>
 
         <div className="card overflow-hidden">

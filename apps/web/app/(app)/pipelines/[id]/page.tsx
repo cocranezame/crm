@@ -165,7 +165,7 @@ export default function TableroPage() {
           <div className="flex min-w-0 items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-50 text-brand-600"><KanbanSquare className="h-5 w-5" /></div>
             <div className="min-w-0">
-              <h1 className="truncate text-lg font-semibold tracking-tight text-ink-900">{tablero.data?.pipeline.nombre ?? 'Pipeline'}</h1>
+              <h1 className="truncate text-lg font-semibold tracking-tight text-ink-900">{tablero.data?.pipeline.nombre ?? 'Kanban'}</h1>
               <p className="text-[13px] text-ink-500">{totalNegocios} negocios · {moneda(totalAbierto, true)} en curso</p>
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function TableroPage() {
       </div>
 
       {/* Tablero */}
-      {tablero.isLoading ? <Cargando /> : tablero.error ? <Vacio titulo="No se pudo cargar el pipeline" texto={(tablero.error as Error).message} /> : (
+      {tablero.isLoading ? <Cargando /> : tablero.error ? <Vacio titulo="No se pudo cargar el tablero" texto={(tablero.error as Error).message} /> : (
         <DndContext sensors={sensors} collisionDetection={colision} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}
           onDragCancel={() => { setActivo(null); arrastrando.current = false; tablero.refetch(); }}>
           <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto p-4">

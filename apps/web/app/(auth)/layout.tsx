@@ -2,7 +2,7 @@ import { MessagesSquare, KanbanSquare, Users, Zap } from 'lucide-react';
 
 const PUNTOS = [
   { icono: MessagesSquare, titulo: 'Una sola bandeja', texto: 'WhatsApp, Messenger y TikTok en tiempo real, con asignación al equipo.' },
-  { icono: KanbanSquare, titulo: 'Pipelines a tu medida', texto: 'Crea tableros, ordena etapas y mueve negocios arrastrando.' },
+  { icono: KanbanSquare, titulo: 'Tableros Kanban a tu medida', texto: 'Crea tableros, ordena etapas y mueve negocios arrastrando.' },
   { icono: Users, titulo: 'Contactos unificados', texto: 'Una ficha por cliente con todos sus canales, campos y etiquetas.' },
   { icono: Zap, titulo: 'Plantillas y difusiones', texto: 'Mensajes aprobados por Meta y envíos masivos por etiqueta.' },
 ];

@@ -286,7 +286,7 @@ function Embudo({ datos }: { datos: Resumen['embudo'] }) {
         </div>
       </div>
       {!p ? (
-        <Vacio icono={<KanbanSquare className="h-5 w-5" />} titulo="Sin pipelines activos" texto="Crea un pipeline para seguir tus oportunidades." className="py-8" />
+        <Vacio icono={<KanbanSquare className="h-5 w-5" />} titulo="Sin tableros activos" texto="Crea un tablero Kanban para seguir tus oportunidades." className="py-8" />
       ) : (
         <div className="space-y-2.5">
           {p.etapas.map((e, i) => {
@@ -397,7 +397,7 @@ function Bienvenida() {
   const pasos = [
     { t: 'Conectar un canal', d: 'WhatsApp, Messenger o TikTok para recibir mensajes', href: '/config/canales', i: Plug, hecho: !!canales?.canales.some((c) => !c.sandbox && c.activo) },
     { t: 'Invitar al equipo', d: 'Suma agentes y supervisores a tu espacio', href: '/config/equipo', i: Users, hecho: (equipo?.miembros.length ?? 0) + (equipo?.invitaciones.length ?? 0) > 1 },
-    { t: 'Personalizar pipeline', d: 'Ajusta las etapas a tu proceso de venta', href: '/config/pipelines', i: KanbanSquare, hecho: (pipelines?.length ?? 0) > 1 },
+    { t: 'Personalizar Kanban', d: 'Ajusta las etapas a tu proceso de venta', href: '/config/pipelines', i: KanbanSquare, hecho: (pipelines?.length ?? 0) > 1 },
     { t: 'Crear respuestas rápidas', d: 'Responde en segundos con /atajos', href: '/config/respuestas', i: Zap, hecho: (respuestas?.length ?? 0) > 0 },
   ];
   const hechos = pasos.filter((p) => p.hecho).length;
