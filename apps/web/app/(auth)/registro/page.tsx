@@ -27,7 +27,7 @@ export default function RegistroPage() {
   return (
     <div>
       <h1 className="text-2xl font-semibold tracking-tight text-ink-900">Crea tu empresa</h1>
-      <p className="mt-1.5 text-sm text-ink-500">14 días de prueba. Te dejamos un pipeline, etiquetas y respuestas listas para empezar.</p>
+      <p className="mt-1.5 text-sm text-ink-500">14 días de prueba. Te dejamos un tablero Kanban, etiquetas y respuestas listas para empezar.</p>
       <form onSubmit={enviar} className="mt-8 space-y-4">
         <Field label="Nombre de tu negocio" required><Input required value={f.empresa_nombre} onChange={set('empresa_nombre')} placeholder="Ferretería El Maestro" /></Field>
         <Field label="Tu nombre" required><Input required value={f.nombre} onChange={set('nombre')} placeholder="Nombre y apellido" /></Field>

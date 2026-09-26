@@ -11,7 +11,7 @@ import { Avatar, Button, Field, Input, Menu, Modal, PageHeader, Select, Skeleton
 
 const ROLES: Record<Rol, { label: string; desc: string; icono: React.ComponentType<{ className?: string }>; clase: string }> = {
   propietario: { label: 'Propietario', desc: 'Control total, incluida la facturación y otros propietarios.', icono: Crown, clase: 'bg-amber-50 text-amber-700' },
-  admin: { label: 'Administrador', desc: 'Configura canales, pipelines, campos y gestiona al equipo.', icono: ShieldCheck, clase: 'bg-brand-50 text-brand-700' },
+  admin: { label: 'Administrador', desc: 'Configura canales, tableros Kanban, campos y gestiona al equipo.', icono: ShieldCheck, clase: 'bg-brand-50 text-brand-700' },
   supervisor: { label: 'Supervisor', desc: 'Ve todas las conversaciones, reasigna, gestiona etiquetas, respuestas y difusiones.', icono: Eye, clase: 'bg-sky-50 text-sky-700' },
   agente: { label: 'Agente', desc: 'Atiende sus conversaciones asignadas y la cola sin asignar.', icono: Headset, clase: 'bg-ink-100 text-ink-600' },
 };

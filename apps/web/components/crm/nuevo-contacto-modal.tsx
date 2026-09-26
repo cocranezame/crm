@@ -52,7 +52,7 @@ export type ContactoCreado = { contacto_id: number; nombre: string | null };
 
 /**
  * Modal único para crear contactos. Se usa en Contactos y en Pipelines (Nuevo negocio).
- * `ocultarPipeline`: oculta "Agregar a pipeline" cuando quien lo abre ya va a crear el negocio.
+ * `ocultarPipeline`: oculta "Agregar al Kanban" cuando quien lo abre ya va a crear el negocio.
  */
 export function NuevoContactoModal({ abierto, onClose, onCreado, ocultarPipeline }: {
   abierto: boolean; onClose: () => void; onCreado: (c: ContactoCreado) => void; ocultarPipeline?: boolean;
@@ -122,7 +122,7 @@ export function NuevoContactoModal({ abierto, onClose, onCreado, ocultarPipeline
             </Select>
           </Field>
           {!ocultarPipeline && (
-            <Field label="Agregar a pipeline" hint="Crea un negocio en la primera etapa">
+            <Field label="Agregar al Kanban" hint="Crea un negocio en la primera etapa">
               <Select value={f.pipeline_id} onChange={set('pipeline_id')}>
                 <option value="">No agregar</option>
                 {pipelines?.filter((p) => p.activo).map((p) => <option key={p.pipeline_id} value={p.pipeline_id}>{p.nombre}</option>)}

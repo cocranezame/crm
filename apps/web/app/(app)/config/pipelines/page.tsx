@@ -50,23 +50,23 @@ function PipelinesConfig() {
 
   return (
     <div>
-      <PageHeader icono={<KanbanSquare className="h-5 w-5" />} titulo="Pipelines"
+      <PageHeader icono={<KanbanSquare className="h-5 w-5" />} titulo="Kanban"
         descripcion="Define los embudos de venta y las etapas por las que avanza cada negocio"
-        acciones={esAdmin && <Button icono={<Plus className="h-4 w-4" />} onClick={() => setNuevo(true)}>Nuevo pipeline</Button>} />
+        acciones={esAdmin && <Button icono={<Plus className="h-4 w-4" />} onClick={() => setNuevo(true)}>Nuevo tablero</Button>} />
       <div className="mx-auto max-w-5xl p-6">
-        {!esAdmin && <AvisoPermiso texto="Solo los administradores pueden modificar pipelines y etapas." />}
+        {!esAdmin && <AvisoPermiso texto="Solo los administradores pueden modificar tableros y etapas." />}
         {isLoading ? (
           <div className="grid gap-6 md:grid-cols-[240px_1fr]">
             <div className="space-y-2">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-16" />)}</div>
             <Skeleton className="h-96" />
           </div>
         ) : !pipelines?.length ? (
-          <div className="card"><Vacio icono={<KanbanSquare className="h-5 w-5" />} titulo="Aún no tienes pipelines" texto="Crea tu primer embudo para organizar tus negocios por etapas."
-            accion={esAdmin && <Button icono={<Plus className="h-4 w-4" />} onClick={() => setNuevo(true)}>Nuevo pipeline</Button>} /></div>
+          <div className="card"><Vacio icono={<KanbanSquare className="h-5 w-5" />} titulo="Aún no tienes tableros Kanban" texto="Crea tu primer embudo para organizar tus negocios por etapas."
+            accion={esAdmin && <Button icono={<Plus className="h-4 w-4" />} onClick={() => setNuevo(true)}>Nuevo tablero</Button>} /></div>
         ) : (
           <div className="grid items-start gap-6 md:grid-cols-[240px_1fr]">
             <div className="space-y-1.5">
-              <p className="mb-2 px-1 text-2xs font-semibold uppercase tracking-wider text-ink-400">{pipelines.length} pipeline{pipelines.length !== 1 && 's'}</p>
+              <p className="mb-2 px-1 text-2xs font-semibold uppercase tracking-wider text-ink-400">{pipelines.length} tablero{pipelines.length !== 1 && 's'}</p>
               {pipelines.map((p) => {
                 const activo = p.pipeline_id === seleccionado?.pipeline_id;
                 return (
@@ -77,7 +77,7 @@ function PipelinesConfig() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <p className={cn('truncate text-[13px] font-semibold', p.activo ? 'text-ink-900' : 'text-ink-400 line-through decoration-ink-300')}>{p.nombre}</p>
-                        {p.es_entrada && <Tooltip texto="Pipeline de entrada: aquí llegan los nuevos leads"><Inbox className="h-3.5 w-3.5 shrink-0 text-brand-500" /></Tooltip>}
+                        {p.es_entrada && <Tooltip texto="Tablero de entrada: aquí llegan los nuevos leads"><Inbox className="h-3.5 w-3.5 shrink-0 text-brand-500" /></Tooltip>}
                       </div>
                       <p className="text-xs text-ink-500">{p.etapas.length} etapas · {p.abiertos} abiertos</p>
                     </div>
@@ -121,21 +121,21 @@ function NuevoPipeline({ abierto, onClose, onCreado }: { abierto: boolean; onClo
     setGuardando(true);
     try {
       const r = await api.post<{ pipeline: Pipeline }>('/pipelines', { nombre: nombre.trim(), color, es_entrada: entrada });
-      toast.success('Pipeline creado con 4 etapas iniciales');
+      toast.success('Tablero creado con 4 etapas iniciales');
       refrescar();
       onCreado(r.pipeline.pipeline_id);
     } catch (err) { toast.error((err as Error).message); } finally { setGuardando(false); }
   }
 
   return (
-    <Modal abierto={abierto} onClose={onClose} titulo="Nuevo pipeline" descripcion="Se crea con las etapas Nuevo, En proceso, Ganado y Perdido. Luego podrás editarlas."
-      pie={<><Button variante="secundario" onClick={onClose}>Cancelar</Button><Button onClick={() => crear()} cargando={guardando} disabled={!nombre.trim()}>Crear pipeline</Button></>}>
+    <Modal abierto={abierto} onClose={onClose} titulo="Nuevo tablero" descripcion="Se crea con las etapas Nuevo, En proceso, Ganado y Perdido. Luego podrás editarlas."
+      pie={<><Button variante="secundario" onClick={onClose}>Cancelar</Button><Button onClick={() => crear()} cargando={guardando} disabled={!nombre.trim()}>Crear tablero</Button></>}>
       <form onSubmit={crear} className="space-y-5">
         <Field label="Nombre" required><Input autoFocus value={nombre} maxLength={60} onChange={(e) => setNombre(e.target.value)} placeholder="Ej. Postventa, Mayoristas…" /></Field>
         <Field label="Color"><ColorPicker value={color} onChange={setColor} /></Field>
         <label className="flex cursor-pointer items-start justify-between gap-4 rounded-xl border border-ink-200 p-3.5">
           <div>
-            <p className="text-[13px] font-medium text-ink-800">Pipeline de entrada</p>
+            <p className="text-[13px] font-medium text-ink-800">Tablero de entrada</p>
             <p className="text-xs text-ink-500">Los nuevos leads que llegan por los canales se crean aquí. Solo puede haber uno.</p>
           </div>
           <Switch checked={entrada} onChange={setEntrada} />
@@ -152,7 +152,7 @@ function EditorPipeline({ p, esAdmin, alBorrar }: { p: Pipeline; esAdmin: boolea
   const [nombre, setNombre] = useState(p.nombre);
   useEffect(() => setNombre(p.nombre), [p.nombre]);
 
-  async function patch(d: Partial<Pick<Pipeline, 'nombre' | 'color' | 'es_entrada' | 'activo'>>, msg = 'Pipeline actualizado') {
+  async function patch(d: Partial<Pick<Pipeline, 'nombre' | 'color' | 'es_entrada' | 'activo'>>, msg = 'Tablero actualizado') {
     try { await api.patch(`/pipelines/${p.pipeline_id}`, d); toast.success(msg); refrescar(); }
     catch (e) { toast.error((e as Error).message); if (d.nombre) setNombre(p.nombre); }
   }
@@ -164,7 +164,7 @@ function EditorPipeline({ p, esAdmin, alBorrar }: { p: Pipeline; esAdmin: boolea
   }
 
   async function eliminar() {
-    const ok = await confirmar({ titulo: `¿Eliminar "${p.nombre}"?`, texto: 'Se eliminarán también sus etapas. Esta acción no se puede deshacer.', confirmar: 'Eliminar pipeline', peligro: true });
+    const ok = await confirmar({ titulo: `¿Eliminar "${p.nombre}"?`, texto: 'Se eliminarán también sus etapas. Esta acción no se puede deshacer.', confirmar: 'Eliminar tablero', peligro: true });
     if (!ok) return;
     try { await api.del(`/pipelines/${p.pipeline_id}`); toast.success('Pipeline eliminado'); refrescar(); alBorrar(); }
     catch (e) { toast.error((e as Error).message); }
@@ -178,7 +178,7 @@ function EditorPipeline({ p, esAdmin, alBorrar }: { p: Pipeline; esAdmin: boolea
             <button disabled={!esAdmin} className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-xs transition-transform hover:scale-105 disabled:hover:scale-100" style={{ backgroundColor: p.color }} title="Cambiar color">
               <KanbanSquare className="h-5 w-5" />
             </button>}>
-            <div className="w-[248px] p-3"><p className="mb-2 text-xs font-medium text-ink-500">Color del pipeline</p><ColorPicker value={p.color} onChange={(c) => patch({ color: c }, 'Color actualizado')} /></div>
+            <div className="w-[248px] p-3"><p className="mb-2 text-xs font-medium text-ink-500">Color del tablero</p><ColorPicker value={p.color} onChange={(c) => patch({ color: c }, 'Color actualizado')} /></div>
           </Popover>
           <div className="min-w-0 flex-1">
             <input value={nombre} disabled={!esAdmin} maxLength={60} onChange={(e) => setNombre(e.target.value)} onBlur={guardarNombre}
@@ -191,17 +191,17 @@ function EditorPipeline({ p, esAdmin, alBorrar }: { p: Pipeline; esAdmin: boolea
               <Link href={`/pipelines/${p.pipeline_id}`} className="inline-flex items-center gap-1 font-medium text-brand-600 hover:text-brand-700">Ver tablero<ExternalLink className="h-3 w-3" /></Link>
             </div>
           </div>
-          {esAdmin && <Tooltip texto={p.es_entrada ? 'No puedes eliminar el pipeline de entrada' : 'Eliminar pipeline'}>
+          {esAdmin && <Tooltip texto={p.es_entrada ? 'No puedes eliminar el tablero de entrada' : 'Eliminar tablero'}>
             <span><Button variante="fantasma" tamano="icono" onClick={eliminar} disabled={p.es_entrada} className="text-ink-400 hover:bg-red-50 hover:text-red-600"><Trash2 className="h-4 w-4" /></Button></span>
           </Tooltip>}
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <OpcionSwitch titulo="Pipeline de entrada" texto="Los leads nuevos de los canales llegan aquí"
-            checked={p.es_entrada} disabled={!esAdmin || p.es_entrada} onChange={(v) => patch({ es_entrada: v }, 'Ahora es el pipeline de entrada')}
-            ayuda={p.es_entrada ? 'Para cambiarlo, marca otro pipeline como entrada' : undefined} />
+          <OpcionSwitch titulo="Tablero de entrada" texto="Los leads nuevos de los canales llegan aquí"
+            checked={p.es_entrada} disabled={!esAdmin || p.es_entrada} onChange={(v) => patch({ es_entrada: v }, 'Ahora es el tablero de entrada')}
+            ayuda={p.es_entrada ? 'Para cambiarlo, marca otro tablero como entrada' : undefined} />
           <OpcionSwitch titulo="Activo" texto="Los inactivos se ocultan del tablero"
-            checked={p.activo} disabled={!esAdmin} onChange={(v) => patch({ activo: v }, v ? 'Pipeline activado' : 'Pipeline desactivado')} />
+            checked={p.activo} disabled={!esAdmin} onChange={(v) => patch({ activo: v }, v ? 'Tablero activado' : 'Tablero desactivado')} />
         </div>
 
         {/* Vista previa del flujo */}
@@ -281,7 +281,7 @@ function EditorEtapas({ p, esAdmin }: { p: Pipeline; esAdmin: boolean }) {
   }
 
   async function eliminar(etapa: Etapa) {
-    if (etapas.length <= 1) { toast.error('Un pipeline necesita al menos una etapa'); return; }
+    if (etapas.length <= 1) { toast.error('Un tablero necesita al menos una etapa'); return; }
     if ((etapa.abiertos ?? 0) > 0) { setBorrando(etapa); return; }
     const ok = await confirmar({ titulo: `¿Eliminar la etapa "${etapa.nombre}"?`, texto: 'Esta acción no se puede deshacer.', confirmar: 'Eliminar etapa', peligro: true });
     if (!ok) return;

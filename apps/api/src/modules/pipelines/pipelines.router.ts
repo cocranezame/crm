@@ -64,14 +64,14 @@ router.patch('/pipelines/:id', requireRol('admin'), ah(async (req, res) => {
     if (d.es_entrada === true) await c.query('UPDATE crm.pipelines SET es_entrada = false WHERE empresa_id = $1 AND pipeline_id <> $2', [empresaId, id]);
     if (d.es_entrada === false) {
       const { rows: [act] } = await c.query('SELECT es_entrada FROM crm.pipelines WHERE pipeline_id = $1', [id]);
-      if (act?.es_entrada) throw invalido('Marca otro pipeline como entrada antes de desmarcar este');
+      if (act?.es_entrada) throw invalido('Marca otro tablero como entrada antes de desmarcar este');
     }
     const { rows: [p] } = await c.query(
       `UPDATE crm.pipelines SET nombre = COALESCE($3, nombre), color = COALESCE($4, color),
               es_entrada = COALESCE($5, es_entrada), activo = COALESCE($6, activo)
         WHERE pipeline_id = $1 AND empresa_id = $2 RETURNING *`,
       [id, empresaId, d.nombre ?? null, d.color ?? null, d.es_entrada ?? null, d.activo ?? null]);
-    if (!p) throw noEncontrado('Pipeline');
+    if (!p) throw noEncontrado('Tablero');
     return p;
   });
   emitirEmpresa(empresaId, 'pipelines:cambio', {});
@@ -84,9 +84,9 @@ router.delete('/pipelines/:id', requireRol('admin'), ah(async (req, res) => {
   const { rows: [p] } = await pool.query(
     `SELECT es_entrada, (SELECT count(*) FROM crm.negocios WHERE pipeline_id = $1)::int AS negocios
        FROM crm.pipelines WHERE pipeline_id = $1 AND empresa_id = $2`, [id, empresaId]);
-  if (!p) throw noEncontrado('Pipeline');
-  if (p.es_entrada) throw conflicto('No puedes eliminar el pipeline de entrada. Marca otro como entrada primero.');
-  if (p.negocios > 0) throw conflicto(`El pipeline tiene ${p.negocios} negocio(s). Muévelos o elimínalos antes, o desactívalo.`);
+  if (!p) throw noEncontrado('Tablero');
+  if (p.es_entrada) throw conflicto('No puedes eliminar el tablero de entrada. Marca otro como entrada primero.');
+  if (p.negocios > 0) throw conflicto(`El tablero tiene ${p.negocios} negocio(s). Muévelos o elimínalos antes, o desactívalo.`);
   await pool.query('DELETE FROM crm.pipelines WHERE pipeline_id = $1 AND empresa_id = $2', [id, empresaId]);
   emitirEmpresa(empresaId, 'pipelines:cambio', {});
   res.json({ ok: true });
@@ -118,7 +118,7 @@ router.post('/pipelines/:id/etapas', requireRol('admin'), ah(async (req, res) =>
   const pipelineId = idParam(req);
   const d = sEtapa.parse(req.body);
   const { rows: [p] } = await pool.query('SELECT 1 FROM crm.pipelines WHERE pipeline_id = $1 AND empresa_id = $2', [pipelineId, empresaId]);
-  if (!p) throw noEncontrado('Pipeline');
+  if (!p) throw noEncontrado('Tablero');
   // El orden se calcula DENTRO del pipeline (en ReparaTego era global: bug corregido).
   const { rows: [e] } = await pool.query(
     `INSERT INTO crm.etapas (empresa_id, pipeline_id, nombre, color, tipo, sla_horas, orden)
@@ -151,7 +151,7 @@ router.delete('/etapas/:id', requireRol('admin'), ah(async (req, res) => {
       'SELECT pipeline_id FROM crm.etapas WHERE etapa_id = $1 AND empresa_id = $2', [id, empresaId]);
     if (!e) throw noEncontrado('Etapa');
     const { rows: [{ total }] } = await c.query<{ total: number }>('SELECT count(*)::int AS total FROM crm.etapas WHERE pipeline_id = $1', [e.pipeline_id]);
-    if (total <= 1) throw conflicto('Un pipeline necesita al menos una etapa');
+    if (total <= 1) throw conflicto('Un tablero necesita al menos una etapa');
     const { rows: negocios } = await c.query<{ negocio_id: number }>('SELECT negocio_id FROM crm.negocios WHERE etapa_id = $1', [id]);
     if (negocios.length) {
       if (!destino || destino === id) throw invalido(`La etapa tiene ${negocios.length} negocio(s): indica a qué etapa moverlos`);
@@ -178,7 +178,7 @@ router.put('/pipelines/:id/etapas/orden', requireRol('admin'), ah(async (req, re
       'SELECT etapa_id FROM crm.etapas WHERE pipeline_id = $1 AND empresa_id = $2', [pipelineId, empresaId]);
     const actuales = new Set(rows.map((r) => r.etapa_id));
     if (rows.length !== etapa_ids.length || etapa_ids.some((x) => !actuales.has(x))) {
-      throw invalido('La lista debe contener exactamente las etapas del pipeline');
+      throw invalido('La lista debe contener exactamente las etapas del tablero');
     }
     for (const [i, id] of etapa_ids.entries()) {
       await c.query('UPDATE crm.etapas SET orden = $2 WHERE etapa_id = $1', [id, i]);
@@ -194,7 +194,7 @@ router.get('/pipelines/:id/tablero', ah(async (req, res) => {
   const { empresaId } = ctx(req);
   const pipelineId = idParam(req);
   const { rows: [p] } = await pool.query('SELECT * FROM crm.pipelines WHERE pipeline_id = $1 AND empresa_id = $2', [pipelineId, empresaId]);
-  if (!p) throw noEncontrado('Pipeline');
+  if (!p) throw noEncontrado('Tablero');
   const { rows: etapas } = await pool.query('SELECT * FROM crm.etapas WHERE pipeline_id = $1 ORDER BY orden', [pipelineId]);
 
   const q = typeof req.query.q === 'string' && req.query.q.trim() ? `%${req.query.q.trim()}%` : null;
